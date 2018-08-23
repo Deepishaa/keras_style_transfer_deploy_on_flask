@@ -1,4 +1,4 @@
-from keras.models import Sequential
+from keras.models import Model
 from keras.layers import MaxPooling2D, Conv2D, Input
 from PIL import Image as pil_image
 from keras import backend as K
@@ -6,41 +6,68 @@ import numpy as np
 from keras.applications import vgg19
 
 def customVGG16(input_tensor):
-	vgg16 = vgg19.VGG19(weights='imagenet', include_top=False input_tensor = 'input_tensor')
-	input_shape = (224, 224, 3)
-	if not K.is_keras_tensor(input_tensor):
-		img_input = Input(tensor=input_tensor, shape=input_shape)
-	else:
-		img_input = input_tensor
-	model = Sequential()
-	model.add(Conv2D(64, (3, 3), dtype = 'float32', input_shape=input_shape, padding='same',
-           activation='relu', weights=vgg16.layers[1].get_weights()))#--> layer 1
-	model.add(Conv2D(64, (3, 3), activation='relu', padding='same', weights=vgg16.layers[2].get_weights()))#--> layer 2
-	model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2), weights=vgg16.layers[3].get_weights()))#--> layer 3
-	model.add(Conv2D(128, (3, 3), activation='relu', padding='same', weights=vgg16.layers[4].get_weights()))#--> layer 4
-	model.add(Conv2D(128, (3, 3), activation='relu', padding='same', weights=vgg16.layers[5].get_weights()))#--> layer 5
-	model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2), weights=vgg16.layers[6].get_weights()))#--> layer 6
-	model.add(Conv2D(256, (3, 3), activation='relu', padding='same', weights=vgg16.layers[7].get_weights()))#--> layer 7
-	model.add(Conv2D(256, (3, 3), activation='relu', padding='same', weights=vgg16.layers[8].get_weights())) #--> layer 8. 
-	model.add(Conv2D(256, (3, 3), activation='relu', padding='same', weights=vgg16.layers[9].get_weights()))#--> layer 9
-	model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2), weights=vgg16.layers[10].get_weights()))#--> layer 10
-	model.add(Conv2D(512, (3, 3), activation='relu', padding='same', weights=vgg16.layers[11].get_weights()))#--> layer 11
-	model.add(Conv2D(512, (3, 3), activation='relu', padding='same', weights=vgg16.layers[12].get_weights()))#--> layer 12
-	model.add(Conv2D(512, (3, 3), activation='relu', padding='same', weights=vgg16.layers[13].get_weights()))#--> layer 13
-	model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2), weights=vgg16.layers[14].get_weights()))#--> layer 14
-	model.add(Conv2D(512, (3, 3), activation='relu', padding='same',  weights=vgg16.layers[15].get_weights()))#--> layer 15
-	model.add(Conv2D(512, (3, 3), activation='relu', padding='same',  weights=vgg16.layers[16].get_weights()))#--> layer 16
-	model.add(Conv2D(512, (3, 3), activation='relu', padding='same',  weights=vgg16.layers[17].get_weights()))#--> layer 17
-	model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2), weights=vgg16.layers[18].get_weights()))#--> layer 18
-	return model
+    vgg16 = vgg19.VGG19(weights='imagenet', include_top=False, input_tensor=input_tensor)
+    input_shape = (224, 224, 3)
+    if not K.is_keras_tensor(input_tensor):
+        img_input = Input(tensor=input_tensor, shape=input_shape)
+    else:
+        img_input = input_tensor
+
+    # x = Conv2D(64, (3, 3), activation='relu', padding='same', name='block1_conv1')(img_input)
+    # x = MaxPooling2D((2, 2), strides=(2, 2), name='block1_pool')(x)
+    # x = Conv2D(128, (3, 3), activation='relu', padding='same', name='block2_conv1')(x)
+    # x = MaxPooling2D((2, 2), strides=(2, 2), name='block2_pool')(x)
+    # x = Conv2D(256, (3, 3), activation='relu', padding='same', name='block3_conv1')(x)
+    # x = MaxPooling2D((2, 2), strides=(2, 2), name='block3_pool')(x)
+    # x = Conv2D(64, (3, 3), activation='relu', padding='same', name='block4_conv1')(x)
+    # x = MaxPooling2D((2, 2), strides=(2, 2), name='block4_pool')(x)
+    # x = Conv2D(128, (3, 3), activation='relu', padding='same', name='block5_conv1')(x)
+    # x = MaxPooling2D((2, 2), strides=(2, 2), name='block5_pool')(x)
+    # x = Flatten(name='flatten')(x)
+    # x = Dense(512, activation='relu', name='fc1')(x)
+    # x = Dropout(0.2)(x)
+    # x = Dense(256, activation='relu', name='fc2')(x)
+    # x = Dropout(0.2)(x)
+    # x = Dense(classes, activation='softmax', name='final_output')(x)
+    
+    # model = Model(img_input, x, name='flag')
+    # return model
+
+
+    # model = Sequential()
+    x = Conv2D(64, (3, 3), dtype = 'float32', input_shape=input_shape, padding='same',
+           activation='relu', weights=vgg16.layers[1].get_weights())(img_input)#--> layer 1
+    x = Conv2D(64, (3, 3), activation='relu', padding='same', weights=vgg16.layers[2].get_weights())(x)#--> layer 2
+    x = MaxPooling2D(pool_size=(2, 2), strides=(2, 2), weights=vgg16.layers[3].get_weights())(x)#--> layer 3
+    x = Conv2D(128, (3, 3), activation='relu', padding='same', weights=vgg16.layers[4].get_weights())(x)#--> layer 4
+    x = Conv2D(128, (3, 3), activation='relu', padding='same', weights=vgg16.layers[5].get_weights())(x)#--> layer 5
+    x = MaxPooling2D(pool_size=(2, 2), strides=(2, 2), weights=vgg16.layers[6].get_weights())(x)#--> layer 6
+    x = Conv2D(256, (3, 3), activation='relu', padding='same', weights=vgg16.layers[7].get_weights())(x)#--> layer 7
+    x = Conv2D(256, (3, 3), activation='relu', padding='same', weights=vgg16.layers[8].get_weights())(x) #--> layer 8. 
+    x = Conv2D(256, (3, 3), activation='relu', padding='same', weights=vgg16.layers[9].get_weights())(x)#--> layer 9
+    x = Conv2D(256, (3, 3), activation='relu', padding='same', weights=vgg16.layers[10].get_weights())(x)#--> layer 9
+    x = MaxPooling2D(pool_size=(2, 2), strides=(2, 2), weights=vgg16.layers[11].get_weights())(x)#--> layer 10
+    x = Conv2D(512, (3, 3), activation='relu', padding='same', weights=vgg16.layers[12].get_weights())(x)#--> layer 11
+    x = Conv2D(512, (3, 3), activation='relu', padding='same', weights=vgg16.layers[13].get_weights())(x)#--> layer 12
+    x = Conv2D(512, (3, 3), activation='relu', padding='same', weights=vgg16.layers[14].get_weights())(x)#--> layer 13
+    x = Conv2D(512, (3, 3), activation='relu', padding='same', weights=vgg16.layers[15].get_weights())(x)#--> layer 13
+    x = MaxPooling2D(pool_size=(2, 2), strides=(2, 2), weights=vgg16.layers[16].get_weights())(x)#--> layer 14
+    x = Conv2D(512, (3, 3), activation='relu', padding='same',  weights=vgg16.layers[17].get_weights())(x)#--> layer 15
+    x = Conv2D(512, (3, 3), activation='relu', padding='same',  weights=vgg16.layers[18].get_weights())(x)#--> layer 16
+    x = Conv2D(512, (3, 3), activation='relu', padding='same',  weights=vgg16.layers[19].get_weights())(x)#--> layer 17
+    x = Conv2D(512, (3, 3), activation='relu', padding='same',  weights=vgg16.layers[20].get_weights())(x)#--> layer 17
+    x = MaxPooling2D(pool_size=(2, 2), strides=(2, 2), weights=vgg16.layers[21].get_weights())(x)#--> layer 18
+
+    model = Model(img_input, x, name='vgg16')
+    return model
 
 def load_image(x, target_size=None):
     img = pil_image.open(x)
     if img.mode != 'RGB':
         img = img.convert('RGB')
     if target_size is not None:
-    	width_height_tuple = (target_size[1], target_size[0])
-    	img = img.resize(width_height_tuple, pil_image.NEAREST)
+        width_height_tuple = (target_size[1], target_size[0])
+        img = img.resize(width_height_tuple, pil_image.NEAREST)
     return img
 
 def img_to_array(img, data_format=None):
@@ -105,9 +132,9 @@ def img_to_array(img, data_format=None):
     return x    
 
 def calc_rowsandcols(width, height):
-	img_nrows = 400
-	img_ncols = int(width * img_nrows / height)
-	return img_nrows,img_ncols
+    img_nrows = 400
+    img_ncols = int(width * img_nrows / height)
+    return img_nrows,img_ncols
 
 def preprocess_image(image_path, width, height):
     # dimensions of the generated picture.
@@ -120,47 +147,48 @@ def preprocess_image(image_path, width, height):
     return img
 
 def preprocess_input(x):
-	data_format = K.image_data_format()
-	x = x.astype(K.floatx(), copy=False)
-	if data_format == 'channels_first':
-		# 'RGB'->'BGR'
-		if x.ndim == 3:
-			x = x[::-1, ...]
-		else:
-			x = x[:, ::-1, ...]
-	else:
-		# 'RGB'->'BGR'
-		x = x[..., ::-1]
-	mean = [103.939, 116.779, 123.68]
-	std = None
-	if data_format == 'channels_first':
-		if x.ndim == 3:
-			x[0, :, :] -= mean[0]
-			x[1, :, :] -= mean[1]
-			x[2, :, :] -= mean[2]
-			if std is not None:
-				x[0, :, :] /= std[0]
-				x[1, :, :] /= std[1]
-				x[2, :, :] /= std[2]
-		else:
-			x[:, 0, :, :] -= mean[0]
-			x[:, 1, :, :] -= mean[1]
-			x[:, 2, :, :] -= mean[2]
-			if std is not None:
-				x[:, 0, :, :] /= std[0]
-				x[:, 1, :, :] /= std[1]
-				x[:, 2, :, :] /= std[2]
-	else:
-		x[..., 0] -= mean[0]
-		x[..., 1] -= mean[1]
-		x[..., 2] -= mean[2]
-		if std is not None:
-			x[..., 0] /= std[0]
-			x[..., 1] /= std[1]
-			x[..., 2] /= std[2]
-	return x
+    data_format = K.image_data_format()
+    x = x.astype(K.floatx(), copy=False)
+    if data_format == 'channels_first':
+        # 'RGB'->'BGR'
+        if x.ndim == 3:
+            x = x[::-1, ...]
+        else:
+            x = x[:, ::-1, ...]
+    else:
+        # 'RGB'->'BGR'
+        x = x[..., ::-1]
+    mean = [103.939, 116.779, 123.68]
+    std = None
+    if data_format == 'channels_first':
+        if x.ndim == 3:
+            x[0, :, :] -= mean[0]
+            x[1, :, :] -= mean[1]
+            x[2, :, :] -= mean[2]
+            if std is not None:
+                x[0, :, :] /= std[0]
+                x[1, :, :] /= std[1]
+                x[2, :, :] /= std[2]
+        else:
+            x[:, 0, :, :] -= mean[0]
+            x[:, 1, :, :] -= mean[1]
+            x[:, 2, :, :] -= mean[2]
+            if std is not None:
+                x[:, 0, :, :] /= std[0]
+                x[:, 1, :, :] /= std[1]
+                x[:, 2, :, :] /= std[2]
+    else:
+        x[..., 0] -= mean[0]
+        x[..., 1] -= mean[1]
+        x[..., 2] -= mean[2]
+        if std is not None:
+            x[..., 0] /= std[0]
+            x[..., 1] /= std[1]
+            x[..., 2] /= std[2]
+    return x
 
-def deprocess_image(x):
+def deprocess_image(x,img_nrows, img_ncols):
+
     if K.image_data_format() == 'channels_first':
         x = x.reshape((3, img_nrows, img_ncols))
         x = x.transpose((1, 2, 0))
@@ -239,5 +267,8 @@ def eval_loss_and_grads(x, width, height, f_outputs):
     else:
         grad_values = np.array(outs[1:]).flatten().astype('float64')
     return loss_value, grad_values
+
+def save_image(x,fname):
+    pil_image.fromarray(x).save(fname)
 
 

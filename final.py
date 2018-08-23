@@ -1,7 +1,7 @@
 import os
 import argparse
 import functions
-# import numpy as nps
+import numpy as np
 # from keras.layers import Dense, Activation, Dropout, Flatten
 # from keras.engine import Input
 from scipy.optimize import fmin_l_bfgs_b
@@ -137,14 +137,14 @@ x = functions.preprocess_image(content_image_path,width,height)
 for i in range(iterations):
     print('Start of iteration', i)
     start_time = time.time()
-    # x, min_val, info = fmin_l_bfgs_b(evaluator.loss, x.flatten(),
-    #                                  fprime=evaluator.grads, maxfun=20)
+    x, min_val, info = fmin_l_bfgs_b(evaluator.loss, x.flatten(),
+                                     fprime=evaluator.grads, maxfun=20)
     
     print('Current loss value:', min_val)
     # save current generated image
-    img = deprocess_image(x.copy())
+    img = functions.deprocess_image(x.copy(),img_nrows, img_ncols)
     fname = result_prefix + '_at_iteration_%d.png' % i
-    Image.fromarray(img).save(fname)
+    functions.save_image(img,fname)
     # image.save_img(fname, img)
     end_time = time.time()
     print('Image saved as', fname)
