@@ -1,0 +1,35 @@
+body{
+	border:1px solid black;
+	background-color: rgb(106, 90, 190);
+	background-image: url(/home/deepisha/bck.jpg);
+	background-repeat: no-repeat;/*doesnt repeat the image*/
+	background-size: cover;/*covers entire screen*/
+}
+
+h1{
+	color: black;
+	text-align: center;
+
+
+}
+
+p{ text-orientation: bold;
+	font-size: 20px;	
+	background-color: lavender;	
+	border: 3px dashed pink;
+	border-radius: 5px;/*rounded edges omg i love em*/
+	padding:5px 5px 200px 5px;
+	float: left;
+	margin: 50px 100px;
+}
+p#submit{
+	padding-bottom: 5px;
+	align-self: center;
+	clear: both;
+}
+
+
+img{
+	height: 100px;
+	width: 100px;
+}	
