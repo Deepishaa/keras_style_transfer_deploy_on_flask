@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+<meta name="description" content="">
+<meta name="author" content="">
+<title>Style Transfer Demo</title>
+<!-- Bootstrap core CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+<link rel="stylesheet" href="{{ url_for('static',filename='style.css') }}">
+</head>
+<body>
+<div class="container">
+<div class="header clearfix">
+	<h3 class="text-muted">Style Transfer Demo</h3>
+</div>
+
+<form id="new-upload-file" method="post" enctype="multipart/form-data">
+	<div id="main-body">
+	    <div class="body-div left">
+	    	<fieldset>
+				<label>Upload Content Image</label>
+				<div class="input-group">
+					<span class="input-group-btn">
+			        	<span class="btn btn-default btn-file">
+		                	Browse... <input name="file" type="file" id="contentImgInp">
+		            	</span>
+	            	</span>
+	            	<input type="text" class="form-control" readonly>
+            	</div>
+	    	</fieldset>
+	    	<img id='content-img-upload'/>
+		</div>
+	    <div class="body-div right">
+	    	<fieldset>
+				<label>Upload Style Image</label>
+				<div class="input-group">
+					<span class="input-group-btn">
+			        	<span class="btn btn-default btn-file">
+		                	Browse... <input name="afile" type="file" id="styleImgInp">
+		            	</span>
+	            	</span>
+	            	<input type="text" class="form-control" readonly>
+            	</div>
+	    	</fieldset>
+	    	<img id='style-img-upload'/>
+		</div>
+	</div>
+	
+	<div class="bottom">
+	    <fieldset>
+	    	<button type="button" class="btn btn-danger" id="new-upload-file-btn">Start Style Transfer</button>
+	    	<div class="info">
+				<label>Iteration: </label><span id="bottom-iteration"></span><br>
+				<label>Loss: </label><span id="bottom-loss"></span>
+			</div>
+	    </fieldset>
+	</div>
+</form>
+
+<div class="jumbotron">
+<p id="result">Your Generated Image</p>
+</div>
+<footer class="footer">
+<p>&copy; 2018</p>
+</footer>
+</div> <!-- /container -->
+<script src='http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+<script type="text/javascript">
+	$(document).ready( function() {
+		function getBase64(file) {
+		   var reader = new FileReader();
+		   reader.readAsDataURL(file);
+		   reader.onload = function () {
+		     console.log(reader.result);
+		   };
+		   reader.onerror = function (error) {
+		     console.log('Error: ', error);
+		   };
+		}
+
+    	$(document).on('change', '.btn-file :file', function() {
+		var input = $(this),
+			label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+		input.trigger('fileselect', [label]);
+		});
+
+		$('.btn-file :file').on('fileselect', function(event, label) {
+		    
+		    var input = $(this).parents('.input-group').find(':text'),
+		        log = label;
+		    
+		    if( input.length ) {
+		        input.val(log);
+		    } else {
+		        if( log ) alert(log);
+		    }
+	    
+		});
+
+		function readStyleURL(input) {
+		    if (input.files && input.files[0]) {
+		        var reader = new FileReader();
+		        
+		        reader.onload = function (e) {
+		            $('#style-img-upload').attr('src', e.target.result);
+		        }
+		        
+		        reader.readAsDataURL(input.files[0]);
+		    }
+		}
+
+		function readContentURL(input) {
+		    if (input.files && input.files[0]) {
+		        var reader = new FileReader();
+		        
+		        reader.onload = function (e) {
+		            $('#content-img-upload').attr('src', e.target.result);
+		        }
+		        
+		        reader.readAsDataURL(input.files[0]);
+		    }
+		}
+
+		$("#contentImgInp").change(function(){
+		    readContentURL(this);
+		}); 
+
+		$("#styleImgInp").change(function(){
+		    readStyleURL(this);
+		}); 
+
+		$(function() {
+		    $('#new-upload-file-btn').click(function() {
+		        var form_data = new FormData($('#new-upload-file')[0]);
+		        $.ajax({
+		            type: 'POST',
+		            url: '/uploadajax/',
+		            data: form_data,
+		            contentType: false,
+		            cache: false,
+		            processData: false,
+		            success: function(data) {
+		                console.log('Success!');
+		            },
+		        });
+		    });
+		});	
+	});
+</script>
+</body>
+</html>
