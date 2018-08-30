@@ -18,11 +18,26 @@
 	<h3 class="text-muted">Style Transfer Demo</h3>
 </div>
 
-<form id="new-upload-file" method="post" enctype="multipart/form-data">
+<form id="new-upload-file" method="post" enctype="multipart/form-data" class="form-inline">
 	<div id="main-body">
+		<div class="top form-group">
+	    	<fieldset>
+				<label>Parameters</label><br><br>
+				<div class="form-group">
+				  <input type="numbers" class="form-control" name="iterations" id="iteration" placeholder="Iterations (default 1)" >
+			    </div>
+				<div class="form-group">
+				  <input type="text" class="form-control" name="sweight" id="styleWeight" placeholder="Style Weight (default 1.0)">
+				</div>
+				<div class="form-group">
+				  <input type="text" class="form-control" name="cweight" id="contentWeight" placeholder="Content Weight (default(0.025)">
+				</div>
+	    	</fieldset>
+		</div>
+		<br><br><br><br>
 	    <div class="body-div left">
 	    	<fieldset>
-				<label>Upload Content Image</label>
+				<label>Upload Content Image</label><br>
 				<div class="input-group">
 					<span class="input-group-btn">
 			        	<span class="btn btn-default btn-file">
@@ -141,7 +156,7 @@
 		$(function() {
 		    $('#new-upload-file-btn').click(function() {
 		        var form_data = new FormData($('#new-upload-file')[0]);
-		        $('body').addClass("loading");
+		        // $('body').addClass("loading");
 		        $.ajax({
 		            type: 'POST',
 		            url: '/uploadajax/',

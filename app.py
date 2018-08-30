@@ -136,6 +136,15 @@ def uploadajax():
 			flash('No file part')
 		styleimage = request.files['afile']
 		contentimage = request.files['file']
+		iterations = request.form['iterations']
+		style_weight = request.form['sweight']
+		content_weight = request.form['cweight']
+		if iterations == "":
+			iterations = 1
+		if style_weight == "":
+			style_weight = 1.0
+		if content_weight == "":
+			content_weight = 0.025
 		if styleimage.filename == '' or contentimage.filename == '':
 			flash('No selected file')
 		if styleimage and contentimage and allowed_file(styleimage.filename) and allowed_file(contentimage.filename):
@@ -146,7 +155,7 @@ def uploadajax():
 			styleimage.save(styleimage_path)
 			contentimage.save(contentimage_path)
 
-		values = style_transfer(contentimage_path, styleimage_path)
+		values = style_transfer(contentimage_path, styleimage_path, iterations=iterations, content_weight=content_weight, style_weight = style_weight)
 		return(json.dumps(values))
 
 
