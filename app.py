@@ -8,6 +8,7 @@ from scipy.optimize import fmin_l_bfgs_b
 import time
 from keras import backend as K
 import numpy as np
+import json
 
 STYLE_FOLDER = './static/img/style'
 CONTENT_FOLDER = './static/img/content'
@@ -21,7 +22,13 @@ app.config['CONTENT_FOLDER'] = CONTENT_FOLDER
 app.config['TRANSFER_FOLDER'] = TRANSFER_FOLDER
 app.debug = True
 
-content_image_path = ""
+class Variables():
+	def __init__(self):
+		self.width = 0
+		self.height = 0
+		self.f_outputs = None
+
+variables = Variables()
 
 class Evaluator(object):
 
@@ -31,9 +38,7 @@ class Evaluator(object):
 
 	def loss(self, x):
 		assert self.loss_value is None
-		width = 300
-		height = 200
-		loss_value, grad_values = functions.eval_loss_and_grads(x, width, height, f_outputs)
+		loss_value, grad_values = functions.eval_loss_and_grads(x, variables.width, variables.height, variables.f_outputs)
 		self.loss_value = loss_value
 		self.grad_values = grad_values
 		return self.loss_value
@@ -45,16 +50,19 @@ class Evaluator(object):
 		self.grad_values = None
 		return grad_values
 
+evaluator = Evaluator()
+
 def allowed_file(filename):
 	return '.' in filename and \
 		filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-def style_transfer(content_image_path, style_image_path, result_prefix='transfer_', iterations=10, content_weight=0.025, style_weight = 1.0, total_variation_weight = 1):
+def style_transfer(content_image_path, style_image_path, result_prefix='transfer_', iterations=1, content_weight=0.025, style_weight = 1.0, total_variation_weight = 1):
 	# dimensions of the generated picture.
-	width, height = functions.load_image(content_image_path).size
-	content_image = K.variable(functions.preprocess_image(content_image_path, width, height))
-	style_reference_image = K.variable(functions.preprocess_image(style_image_path,width, height))
-	img_nrows, img_ncols = functions.calc_rowsandcols(width,height)
+	result_prefix = TRANSFER_FOLDER + "/" + result_prefix
+	variables.width, variables.height = functions.load_image(content_image_path).size
+	content_image = K.variable(functions.preprocess_image(content_image_path, variables.width, variables.height))
+	style_reference_image = K.variable(functions.preprocess_image(style_image_path,variables.width, variables.height))
+	img_nrows, img_ncols = functions.calc_rowsandcols(variables.width,variables.height)
 	if K.image_data_format() == 'channels_first':
 		combination_image = K.placeholder((1, 3, img_nrows, img_ncols))
 	else:
@@ -62,7 +70,6 @@ def style_transfer(content_image_path, style_image_path, result_prefix='transfer
 	input_tensor = K.concatenate([content_image,
 							  style_reference_image,
 							  combination_image], axis=0)
-	return(str(type(input_tensor)))
 	model = functions.customVGG16(input_tensor)
 	outputs_dict = dict([(layer.name, layer.output) for layer in model.layers])
 	loss = K.variable(0.)
@@ -78,36 +85,37 @@ def style_transfer(content_image_path, style_image_path, result_prefix='transfer
 		layer_features = outputs_dict[layer_name]
 		style_reference_features = layer_features[1, :, :, :]
 		combination_features = layer_features[2, :, :, :]
-		sl = functions.style_loss(style_reference_features, combination_features,width,height)
+		sl = functions.style_loss(style_reference_features, combination_features,variables.width,variables.height)
 		loss += (style_weight / len(feature_layers)) * sl
-	loss += total_variation_weight * functions.total_variation_loss(combination_image,width,height)
+	loss += total_variation_weight * functions.total_variation_loss(combination_image,variables.width,variables.height)
 	grads = K.gradients(loss, combination_image)
-
 	outputs = [loss]
 	if isinstance(grads, (list, tuple)):
 		outputs += grads
 	else:
 		outputs.append(grads)
 
-	f_outputs = K.function([combination_image], outputs)
-	evaluator = Evaluator()
-	x = functions.preprocess_image(content_image_path,width,height)
+	variables.f_outputs = K.function([combination_image], outputs)
+	x = functions.preprocess_image(content_image_path,variables.width,variables.height)
 
+	start_time = time.time()
 	for i in range(iterations):
 		print('Start of iteration', i)
-		start_time = time.time()
+		iter_start_time = time.time()
 		x, min_val, info = fmin_l_bfgs_b(evaluator.loss, x.flatten(),
 										 fprime=evaluator.grads, maxfun=20)
-		
 		print('Current loss value:', min_val)
-		# save current generated image
-		img = functions.deprocess_image(x.copy(),img_nrows, img_ncols)
-		fname = result_prefix + '_at_iteration_%d.png' % i
-		functions.save_image(img,fname)
-		# image.save_img(fname, img)
 		end_time = time.time()
-		print('Image saved as', fname)
-		print('Iteration %d completed in %ds' % (i, end_time - start_time))
+		print('Iteration %d completed in %ds' % (i, end_time - iter_start_time))
+		# return [min_val,fname,i,end_time-start_time]
+
+	# save current generated image
+	img = functions.deprocess_image(x.copy(),img_nrows, img_ncols)
+	fname = result_prefix + 'at_iteration_%d.png' % i
+	functions.save_image(img,fname)
+	values = [iterations,str(round(min_val,2)),str(round(end_time-start_time,2)),fname]
+	return values
+		
 
 @app.route("/")
 def index():
@@ -137,10 +145,9 @@ def uploadajax():
 			contentimage_path = os.path.join(app.config['CONTENT_FOLDER'], contentimagename)
 			styleimage.save(styleimage_path)
 			contentimage.save(contentimage_path)
-		style_transfer(contentimage_path, styleimage_path)
 
-		print(request.files)
-		return(str(request.files))
+		values = style_transfer(contentimage_path, styleimage_path)
+		return(json.dumps(values))
 
 
 if __name__ == "__main__":
