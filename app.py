@@ -70,6 +70,7 @@ def style_transfer(content_image_path, style_image_path, result_prefix='transfer
 	input_tensor = K.concatenate([content_image,
 							  style_reference_image,
 							  combination_image], axis=0)
+	print(input_tensor)
 	model = functions.customVGG16(input_tensor)
 	outputs_dict = dict([(layer.name, layer.output) for layer in model.layers])
 	loss = K.variable(0.)
@@ -99,11 +100,11 @@ def style_transfer(content_image_path, style_image_path, result_prefix='transfer
 	x = functions.preprocess_image(content_image_path,variables.width,variables.height)
 
 	start_time = time.time()
-	for i in range(iterations):
+	for i in range(int(iterations)):
 		print('Start of iteration', i)
 		iter_start_time = time.time()
 		x, min_val, info = fmin_l_bfgs_b(evaluator.loss, x.flatten(),
-										 fprime=evaluator.grads, maxfun=20)
+										 fprime=evaluator.grads, maxfun=20, maxiter=1)
 		print('Current loss value:', min_val)
 		end_time = time.time()
 		print('Iteration %d completed in %ds' % (i, end_time - iter_start_time))

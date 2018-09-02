@@ -24,12 +24,15 @@
 	    	<fieldset>
 				<label>Parameters</label><br><br>
 				<div class="form-group">
+				  <strong>Iterations</strong><br>
 				  <input type="numbers" class="form-control" name="iterations" id="iteration" placeholder="Iterations (default 1)" >
 			    </div>
 				<div class="form-group">
+				  <strong>Style Weight</strong><br>
 				  <input type="text" class="form-control" name="sweight" id="styleWeight" placeholder="Style Weight (default 1.0)">
 				</div>
 				<div class="form-group">
+				  <strong>Content Weight</strong><br>
 				  <input type="text" class="form-control" name="cweight" id="contentWeight" placeholder="Content Weight (default(0.025)">
 				</div>
 	    	</fieldset>
@@ -156,7 +159,7 @@
 		$(function() {
 		    $('#new-upload-file-btn').click(function() {
 		        var form_data = new FormData($('#new-upload-file')[0]);
-		        // $('body').addClass("loading");
+		        $('body').addClass("loading");
 		        $.ajax({
 		            type: 'POST',
 		            url: '/uploadajax/',
@@ -172,6 +175,10 @@
 		            	$("#final-image").attr("src",obj[3]);
 		            	$('body').removeClass("loading");
 		            },
+		            error: function(data){
+		            	alert("An error occured!!! Please try again.");
+		            	$('body').removeClass("loading");
+		            }
 		        });
 		    });
 		});	

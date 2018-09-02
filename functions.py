@@ -13,28 +13,6 @@ def customVGG16(input_tensor):
     else:
         img_input = input_tensor
 
-    # x = Conv2D(64, (3, 3), activation='relu', padding='same', name='block1_conv1')(img_input)
-    # x = MaxPooling2D((2, 2), strides=(2, 2), name='block1_pool')(x)
-    # x = Conv2D(128, (3, 3), activation='relu', padding='same', name='block2_conv1')(x)
-    # x = MaxPooling2D((2, 2), strides=(2, 2), name='block2_pool')(x)
-    # x = Conv2D(256, (3, 3), activation='relu', padding='same', name='block3_conv1')(x)
-    # x = MaxPooling2D((2, 2), strides=(2, 2), name='block3_pool')(x)
-    # x = Conv2D(64, (3, 3), activation='relu', padding='same', name='block4_conv1')(x)
-    # x = MaxPooling2D((2, 2), strides=(2, 2), name='block4_pool')(x)
-    # x = Conv2D(128, (3, 3), activation='relu', padding='same', name='block5_conv1')(x)
-    # x = MaxPooling2D((2, 2), strides=(2, 2), name='block5_pool')(x)
-    # x = Flatten(name='flatten')(x)
-    # x = Dense(512, activation='relu', name='fc1')(x)
-    # x = Dropout(0.2)(x)
-    # x = Dense(256, activation='relu', name='fc2')(x)
-    # x = Dropout(0.2)(x)
-    # x = Dense(classes, activation='softmax', name='final_output')(x)
-    
-    # model = Model(img_input, x, name='flag')
-    # return model
-
-
-    # model = Sequential()
     x = Conv2D(64, (3, 3), dtype = 'float32', input_shape=input_shape, padding='same',
            activation='relu', weights=vgg16.layers[1].get_weights())(img_input)#--> layer 1
     x = Conv2D(64, (3, 3), activation='relu', padding='same', weights=vgg16.layers[2].get_weights())(x)#--> layer 2
