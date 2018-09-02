@@ -12,7 +12,6 @@ def customVGG16(input_tensor):
         img_input = Input(tensor=input_tensor, shape=input_shape)
     else:
         img_input = input_tensor
-
     x = Conv2D(64, (3, 3), dtype = 'float32', input_shape=input_shape, padding='same',
            activation='relu', weights=vgg16.layers[1].get_weights())(img_input)#--> layer 1
     x = Conv2D(64, (3, 3), activation='relu', padding='same', weights=vgg16.layers[2].get_weights())(x)#--> layer 2

@@ -50,14 +50,21 @@ class Evaluator(object):
 		self.grad_values = None
 		return grad_values
 
-evaluator = Evaluator()
-
 def allowed_file(filename):
 	return '.' in filename and \
 		filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+def print_all(x):
+	print(x)
+	print(type(x))
+	try:
+		print(x.shape)
+	except:
+		print("Cant print shape")
+
 def style_transfer(content_image_path, style_image_path, result_prefix='transfer_', iterations=1, content_weight=0.025, style_weight = 1.0, total_variation_weight = 1):
 	# dimensions of the generated picture.
+	evaluator = Evaluator()
 	content_weight = float(content_weight)
 	style_weight = float(style_weight)
 	result_prefix = TRANSFER_FOLDER + "/" + result_prefix
@@ -69,10 +76,14 @@ def style_transfer(content_image_path, style_image_path, result_prefix='transfer
 		combination_image = K.placeholder((1, 3, img_nrows, img_ncols))
 	else:
 		combination_image = K.placeholder((1, img_nrows, img_ncols, 3))
+	print_all(content_image)
+	print_all(style_reference_image)
+	print_all(combination_image)
 	input_tensor = K.concatenate([content_image,
 							  style_reference_image,
 							  combination_image], axis=0)
-	print(input_tensor)
+	print_all(input_tensor)
+	# exit(0)
 	model = functions.customVGG16(input_tensor)
 	outputs_dict = dict([(layer.name, layer.output) for layer in model.layers])
 	loss = K.variable(0.)
@@ -100,7 +111,6 @@ def style_transfer(content_image_path, style_image_path, result_prefix='transfer
 
 	variables.f_outputs = K.function([combination_image], outputs)
 	x = functions.preprocess_image(content_image_path,variables.width,variables.height)
-
 	start_time = time.time()
 	for i in range(int(iterations)):
 		print('Start of iteration', i)
