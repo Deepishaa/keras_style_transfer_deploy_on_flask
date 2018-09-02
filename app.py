@@ -58,6 +58,8 @@ def allowed_file(filename):
 
 def style_transfer(content_image_path, style_image_path, result_prefix='transfer_', iterations=1, content_weight=0.025, style_weight = 1.0, total_variation_weight = 1):
 	# dimensions of the generated picture.
+	content_weight = float(content_weight)
+	style_weight = float(style_weight)
 	result_prefix = TRANSFER_FOLDER + "/" + result_prefix
 	variables.width, variables.height = functions.load_image(content_image_path).size
 	content_image = K.variable(functions.preprocess_image(content_image_path, variables.width, variables.height))
